@@ -16,4 +16,10 @@ export class MovieReview {
 
   @Column({ nullable: true })
   notes: string;
+
+  @Column({ nullable: true })  // Novo campo
+  actors: string;
+
+  @Column({ nullable: true })  // Novo campo
+  director: string;
 }

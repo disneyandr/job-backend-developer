@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { MovieReviewService } from './movie-review.service';
 import { MovieReview } from './movie-review.entity';
 
@@ -36,5 +45,26 @@ export class MovieReviewController {
   @Delete(':id')
   async deleteReview(@Param('id') id: number): Promise<void> {
     return this.movieReviewService.deleteMovieReview(id);
+  }
+
+  @Get('filter')
+  async getFilteredAndSortedReviews(
+    @Query('title') title?: string,
+    @Query('releaseDate') releaseDate?: string,
+    @Query('imdbRating') imdbRating?: number,
+    @Query('actors') actors?: string,
+    @Query('director') director?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('order') order: 'ASC' | 'DESC' = 'ASC',
+  ): Promise<MovieReview[]> {
+    return this.movieReviewService.getFilteredAndSortedReviews(
+      title,
+      releaseDate,
+      imdbRating,
+      actors,
+      director,
+      sortBy,
+      order,
+    );
   }
 }

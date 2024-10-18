@@ -30,6 +30,8 @@ export class MovieReviewService {
     movieReview.releaseDate = movieData.Released;
     movieReview.imdbRating = movieData.imdbRating;
     movieReview.notes = notes;
+    movieReview.actors = movieData.Actors; // Novo campo
+    movieReview.director = movieData.Director; // Novo campo
 
     return this.movieReviewRepository.save(movieReview);
   }
@@ -41,7 +43,10 @@ export class MovieReviewService {
       );
       return response.data;
     } catch (error) {
-      console.error(`Falha ao buscar dados do filme para o título: ${title}`, error);
+      console.error(
+        `Falha ao buscar dados do filme para o título: ${title}`,
+        error,
+      );
       throw new Error('Falha ao buscar dados de filmes da API OMDB');
     }
   }
@@ -54,27 +59,78 @@ export class MovieReviewService {
     return this.movieReviewRepository.findOne({ where: { id } });
   }
 
-  async updateMovieReview(
-    id: number,
-    title: string,
-    notes: string,
-  ): Promise<MovieReview> {
-    const movieReview = await this.getMovieReviewById(id);
-    if (!movieReview) {
-      throw new Error(`Movie review com ID ${id} não foi encontrado.`);
-    }
+  // src/movie-reviews/movie-review.service.ts
 
-    const movieData = await this.fetchMovieData(title);
-
-    movieReview.title = title;
-    movieReview.releaseDate = movieData.Released;
-    movieReview.imdbRating = movieData.imdbRating;
-    movieReview.notes = notes;
-
-    return this.movieReviewRepository.save(movieReview);
+async updateMovieReview(
+  id: number,
+  title: string,
+  notes: string,
+): Promise<MovieReview> {
+  const movieReview = await this.getMovieReviewById(id);
+  if (!movieReview) {
+    throw new Error(`Movie review com ID ${id} não foi encontrado.`);
   }
+
+  // Busca os dados do filme na OMDB
+  const movieData = await this.fetchMovieData(title);
+
+  if (!movieData.Response || movieData.Response === "False") {
+    throw new Error(`Erro ao buscar dados do filme: ${movieData.Error}`);
+  }
+
+  movieReview.title = title;
+  movieReview.releaseDate = movieData.Released;
+  movieReview.imdbRating = movieData.imdbRating;
+  movieReview.notes = notes;
+
+  // Atualizando os campos actors e director a partir da resposta da OMDB
+  movieReview.actors = movieData.Actors;  
+  movieReview.director = movieData.Director;  
+
+  return this.movieReviewRepository.save(movieReview);
+}
+
 
   async deleteMovieReview(id: number): Promise<void> {
     await this.movieReviewRepository.delete(id);
+  }
+
+  async getFilteredAndSortedReviews(
+    title?: string,
+    releaseDate?: string,
+    imdbRating?: number,
+    actors?: string,
+    director?: string,
+    sortBy: string = 'title',
+    order: 'ASC' | 'DESC' = 'ASC',
+  ): Promise<MovieReview[]> {
+    const queryBuilder =
+      this.movieReviewRepository.createQueryBuilder('review');
+
+    //filtros
+    if (title) {
+      queryBuilder.andWhere('review.title LIKE :title', {
+        title: `%${title}%`,
+      });
+    }
+    if (releaseDate) {
+      queryBuilder.andWhere('review.releaseDate = :releaseDate', {
+        releaseDate,
+      });
+    }
+    if (imdbRating) {
+      queryBuilder.andWhere('review.imdbRating >= :imdbRating', { imdbRating });
+    }
+
+    if(actors){
+      queryBuilder.andWhere('review.actors LIKE :actors', {actors: `%${actors}%`});
+    }
+    if (director) {
+      queryBuilder.andWhere('review.director LIKE :director', {director: `%${director}%`})
+    }
+    //ordenação
+    queryBuilder.orderBy(`review.${sortBy}`, order);
+
+    return queryBuilder.getMany();
   }
 }
