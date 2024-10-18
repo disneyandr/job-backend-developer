@@ -9,7 +9,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { MovieReviewService } from './movie-review.service';
+import { PaginatedResult } from './dtos/paginated-result.dto';
 import { MovieReview } from './movie-review.entity';
+
 
 @Controller('movie-reviews')
 export class MovieReviewController {
@@ -23,10 +25,10 @@ export class MovieReviewController {
     return this.movieReviewService.createMovieReview(title, notes);
   }
 
-  @Get()
-  async getAllReviews(): Promise<MovieReview[]> {
-    return this.movieReviewService.getAllMovieReviews();
-  }
+  // @Get()
+  // async getAllReviews(): Promise<MovieReview[]> {
+  //   return this.movieReviewService.getAllMovieReviews();
+  // }
 
   @Get(':id')
   async getReviewById(@Param('id') id: number): Promise<MovieReview> {
@@ -66,5 +68,13 @@ export class MovieReviewController {
       sortBy,
       order,
     );
+  }
+
+  @Get()
+  async getMovieReviews(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<PaginatedResult<MovieReview>> {
+    return this.movieReviewService.getMovieReviews(page, limit);
   }
 }
