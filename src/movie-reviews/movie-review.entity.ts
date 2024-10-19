@@ -22,4 +22,8 @@ export class MovieReview {
 
   @Column({ nullable: true })  // Novo campo
   director: string;
+  
+  //novo campo para contagem de visualizações
+  @Column({ type: 'int', default: 0 })
+  views: number;
 }

@@ -31,10 +31,20 @@ export class MovieReviewController {
     return this.movieReviewService.createMovieReview(title, notes);
   }
 
-  // @Get()
-  // async getAllReviews(): Promise<MovieReview[]> {
-  //   return this.movieReviewService.getAllMovieReviews();
-  // }
+  //rota para visualizar os filmes mais visualizados
+  @Get('most-viewed') // Para listar as mais visualizadas
+  @ApiOperation({ summary: 'Listar as resenhas de filmes mais visualizadas.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de resenhas de filmes mais visualizadas.',
+    type: [MovieReview],
+  })
+  async getMostViewedReviews(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<PaginatedResult<MovieReview>> {
+    return this.movieReviewService.getMostViewedReviews(page, limit);
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Listar a resenha conforme o  id do filme.' })

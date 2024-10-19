@@ -23,7 +23,10 @@ export class MovieReviewService {
     this.omdbApiUrl = `http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&t=`;
   }
 
-  async getMovieReviews(page: number, limit: number): Promise<PaginatedResult<MovieReview>> {
+  async getMovieReviews(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<MovieReview>> {
     const [result, total] = await this.movieReviewRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
@@ -71,10 +74,20 @@ export class MovieReviewService {
   }
 
   async getMovieReviewById(id: number): Promise<MovieReview> {
-    return this.movieReviewRepository.findOne({ where: { id } });
-  }
+    const movieReview = await this.movieReviewRepository.findOneBy({ id });
 
-  // src/movie-reviews/movie-review.service.ts
+    if (!movieReview) {
+      throw new Error(`Movie review com ID ${id} não foi encontrado.`);
+    }
+
+    //incrementando
+    movieReview.views += 1;
+
+    //salvar a nova contagem de visualizações no bd
+    await this.movieReviewRepository.save(movieReview);
+
+    return movieReview;
+  }
 
   async updateMovieReview(
     id: number,
@@ -150,5 +163,27 @@ export class MovieReviewService {
     queryBuilder.orderBy(`review.${sortBy}`, order);
 
     return queryBuilder.getMany();
+  }
+
+  async getMostViewedReviews(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<MovieReview>> {
+    // Realiza a consulta no banco de dados com ordenação por views
+    const [result, total] = await this.movieReviewRepository.findAndCount({
+      order: {
+        views: 'DESC', // Ordena os resultados pelo campo views em ordem decrescente
+      },
+      take: limit, // Limita o número de resultados retornados
+      skip: (page - 1) * limit, // Implementa a lógica de paginação
+    });
+
+    // Retorna os dados no formato solicitado
+    return {
+      data: result,
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 }
