@@ -12,12 +12,26 @@ import { MovieReviewService } from './movie-review.service';
 import { PaginatedResult } from './dtos/paginated-result.dto';
 import { MovieReview } from './movie-review.entity';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateMovieReviewDto } from './dtos/paginated-result.dto';
+
 
 @ApiTags('movie-reviews')
 @Controller('movie-reviews')
 export class MovieReviewController {
   constructor(private readonly movieReviewService: MovieReviewService) {}
 
+  // @Post()
+  // @ApiOperation({ summary: 'Criar uma nova resenha de filme' })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: 'Resenha de filme criada com sucesso.',
+  // })
+  // async createReview(
+  //   @Body('title') title: string,
+  //   @Body('notes') notes: string,
+  // ): Promise<MovieReview> {
+  //   return this.movieReviewService.createMovieReview(title, notes);
+  // }
   @Post()
   @ApiOperation({ summary: 'Criar uma nova resenha de filme' })
   @ApiResponse({
@@ -25,12 +39,11 @@ export class MovieReviewController {
     description: 'Resenha de filme criada com sucesso.',
   })
   async createReview(
-    @Body('title') title: string,
-    @Body('notes') notes: string,
+    @Body() createReviewDto: CreateMovieReviewDto,
   ): Promise<MovieReview> {
+    const { title, notes } = createReviewDto;
     return this.movieReviewService.createMovieReview(title, notes);
   }
-
   //rota para visualizar os filmes mais visualizados
   @Get('most-viewed') // Para listar as mais visualizadas
   @ApiOperation({ summary: 'Listar as resenhas de filmes mais visualizadas.' })
