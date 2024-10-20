@@ -12,10 +12,14 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('movie-reviews')
     .build();
+    
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
-  // Fim da configuração do Swagger
+  const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui.min.css";
   
-  await app.listen(process.env.PORT ?? 3000);
+  SwaggerModule.setup('docs', app, document, {
+    customCssUrl: CSS_URL,
+  });
+
+  await app.listen(process.env.DB_PORT ?? 3000);
 }
 bootstrap();
