@@ -14,10 +14,16 @@ async function bootstrap() {
     .build();
     
   const document = SwaggerModule.createDocument(app, config);
+  
+  // URL do CSS do Swagger UI
   const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui.min.css";
   
   SwaggerModule.setup('docs', app, document, {
     customCssUrl: CSS_URL,
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui-bundle.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.3.0/swagger-ui-standalone-preset.js'
+    ],
   });
 
   await app.listen(process.env.PORT ?? 3000);
