@@ -20,6 +20,6 @@ async function bootstrap() {
     customCssUrl: CSS_URL,
   });
 
-  await app.listen(process.env.DB_PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
